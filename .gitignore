@@ -1,0 +1,23 @@
+.build/
+.DS_Store
+**/.DS_Store
+DerivedData/
+*.xcuserstate
+.swiftpm/
+*.xcodeproj/
+*.xcworkspace/
+*.dSYM/
+*.app/
+*.zip
+*.tar.gz
+*.log
+
+# Local data and secrets
+.env
+.env.*
+subscriptions.json
+subsight*.json
+subsight*.csv
+*.sqlite
+*.db
+*.pem
