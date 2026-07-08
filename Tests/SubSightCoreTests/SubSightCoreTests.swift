@@ -179,6 +179,19 @@ final class SubSightCoreTests: XCTestCase {
         XCTAssertNil(try repository.get(id: sooner.id))
     }
 
+    func testRepositoryLoadsEmptyDataFileAsEmptyList() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        let fileURL = folder.appending(path: "subscriptions.json")
+        let repository = SubscriptionRepository(fileURL: fileURL)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+
+        try Data().write(to: fileURL)
+        XCTAssertEqual(try repository.load().count, 0)
+
+        try Data(" \n\t".utf8).write(to: fileURL)
+        XCTAssertEqual(try repository.load().count, 0)
+    }
+
     func testFilterSearchesAccountAndCancellationURL() {
         let subscriptions = [
             Subscription(name: "ChatGPT", cancellationURL: "https://chatgpt.com/cancel", accountHint: "personal@example.com"),

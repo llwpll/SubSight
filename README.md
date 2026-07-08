@@ -48,10 +48,17 @@ open .build/SubSight.app
 swift build -c release --product subsightctl
 ```
 
-安装到 `PATH` 中的某个目录：
+安装到 `PATH` 中的某个目录。Apple Silicon + Homebrew 用户通常可以用：
 
 ```sh
-cp .build/release/subsightctl /usr/local/bin/subsightctl
+install -m 755 .build/release/subsightctl /opt/homebrew/bin/subsightctl
+```
+
+或者安装到用户目录，避免系统目录权限问题：
+
+```sh
+mkdir -p ~/.local/bin
+install -m 755 .build/release/subsightctl ~/.local/bin/subsightctl
 ```
 
 也可以从 GitHub Release 产物安装：
@@ -59,7 +66,10 @@ cp .build/release/subsightctl /usr/local/bin/subsightctl
 ```sh
 tar -xzf subsightctl-<version>-macos-<arch>.tar.gz
 chmod +x subsightctl
-sudo mv subsightctl /usr/local/bin/subsightctl
+install -m 755 subsightctl /opt/homebrew/bin/subsightctl
+# 或者：
+mkdir -p ~/.local/bin
+install -m 755 subsightctl ~/.local/bin/subsightctl
 ```
 
 确认安装成功：

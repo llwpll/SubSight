@@ -34,6 +34,10 @@ public struct SubscriptionRepository: Sendable {
             return []
         }
         let data = try Data(contentsOf: fileURL)
+        if data.isEmpty ||
+            String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
+            return []
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode([Subscription].self, from: data)

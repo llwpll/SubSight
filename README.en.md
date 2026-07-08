@@ -48,10 +48,17 @@ From source:
 swift build -c release --product subsightctl
 ```
 
-Install it somewhere on your `PATH`:
+Install it somewhere on your `PATH`. For Apple Silicon + Homebrew, this usually works:
 
 ```sh
-cp .build/release/subsightctl /usr/local/bin/subsightctl
+install -m 755 .build/release/subsightctl /opt/homebrew/bin/subsightctl
+```
+
+Or install it into your user-local bin directory to avoid system directory permissions:
+
+```sh
+mkdir -p ~/.local/bin
+install -m 755 .build/release/subsightctl ~/.local/bin/subsightctl
 ```
 
 Or install from a GitHub Release artifact:
@@ -59,7 +66,10 @@ Or install from a GitHub Release artifact:
 ```sh
 tar -xzf subsightctl-<version>-macos-<arch>.tar.gz
 chmod +x subsightctl
-sudo mv subsightctl /usr/local/bin/subsightctl
+install -m 755 subsightctl /opt/homebrew/bin/subsightctl
+# Or:
+mkdir -p ~/.local/bin
+install -m 755 subsightctl ~/.local/bin/subsightctl
 ```
 
 Verify the install:
