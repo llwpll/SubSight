@@ -118,39 +118,72 @@ subsightctl rates --base USD --quotes CNY,EUR,HKD
 
 ## 代理使用方式
 
-Codex、OpenClaw、shell 脚本或其他本地代理都可以通过 `subsightctl` 记录订阅。只要 CLI 已经在 `PATH` 里，就不需要额外集成。
+Codex、OpenClaw、shell 脚本或其他本地代理都可以通过 `subsightctl` 记录订阅。只要 CLI 已经在 `PATH` 里，就不需要额外集成，也不需要让代理直接编辑数据文件。
 
 可以给代理这样的指令：
 
 ```text
-使用 `subsightctl` CLI 读取和更新我的 SubSight 订阅。
+我接下来要整理订阅、账单和其他周期性支出。
+请使用 `subsightctl` CLI 帮我记录到 SubSight。
 不要直接编辑 `subscriptions.json`。
-修改前先运行 `subsightctl list --json`。
-添加或更新订阅后，用 `subsightctl get --id <UUID> --json` 或 `subsightctl list --json` 验证结果。
+开始前先运行 `subsightctl list --json` 看看已有记录，避免重复添加。
+我用自然语言描述支出时，请你推断金额、币种、周期、下次缴费日、分类和备注。
+如果日期、币种或周期不明确，先问我确认。
+每次添加或更新后，用 `subsightctl get --id <UUID> --json` 或 `subsightctl list --json` 验证结果。
 ```
 
-代理可以执行的命令示例：
+你可以像这样对代理说：
+
+```text
+帮我记一下这些周期性支出：
+通信话费 29 元一个月，每月 1 号缴费。
+AI 工具订阅 100 美元一个月，上次缴费是 6 月 23 日。
+房租按每月 1500 元计算，三个月交一次，上次是 5 月 20 日交的。
+```
+
+代理应把自然语言转成 `subsightctl` 命令。例如，假设今天是 `2026-07-09`，上面的输入可以记录为：
 
 ```sh
 subsightctl add \
-  --name "GitHub Copilot" \
-  --amount 10 \
-  --currency USD \
+  --name "通信话费" \
+  --amount 29 \
+  --currency CNY \
   --cycle monthly \
   --next 2026-08-01 \
+  --category 通信 \
+  --payment "自动扣费" \
+  --notes "每月 1 号缴费"
+
+subsightctl add \
+  --name "AI 工具订阅" \
+  --amount 100 \
+  --currency USD \
+  --cycle monthly \
+  --next 2026-07-23 \
   --category AI \
   --payment "Credit Card" \
-  --account "work account" \
-  --notes "Added by Codex via subsightctl"
+  --notes "上次缴费 2026-06-23，由代理通过 subsightctl 记录"
+
+subsightctl add \
+  --name "房租" \
+  --amount 4500 \
+  --currency CNY \
+  --cycle quarterly \
+  --next 2026-08-20 \
+  --category 住房 \
+  --payment "转账" \
+  --notes "按每月 1500 元计算，三个月交一次；上次缴费 2026-05-20"
 
 subsightctl due --days 30 --json
 subsightctl summary --base CNY --json
-subsightctl list --query github --json
+subsightctl list --query 房租 --json
 ```
 
 如果只是演示或给代理做隔离测试，可以把 CLI 指向单独的数据文件：
 
 ```sh
+rm -f /tmp/subsight-agent-demo.json
+
 SUBSIGHT_DATA_FILE=/tmp/subsight-agent-demo.json subsightctl add \
   --name "Demo Service" \
   --amount 20 \
@@ -158,6 +191,8 @@ SUBSIGHT_DATA_FILE=/tmp/subsight-agent-demo.json subsightctl add \
   --cycle monthly \
   --next 2026-08-01
 ```
+
+生产使用时不要设置 `SUBSIGHT_DATA_FILE`，这样 App 和 CLI 会共同使用默认的本地数据文件。
 
 ## 数据位置
 

@@ -118,39 +118,72 @@ subsightctl rates --base USD --quotes CNY,EUR,HKD
 
 ## Agent Usage
 
-Codex, OpenClaw, shell scripts, and other local agents can record subscriptions by calling `subsightctl`. No special integration is required as long as the CLI is on `PATH`.
+Codex, OpenClaw, shell scripts, and other local agents can record subscriptions by calling `subsightctl`. No special integration is required as long as the CLI is on `PATH`, and the agent does not need to edit the data file directly.
 
 Suggested instruction for an agent:
 
 ```text
-Use the `subsightctl` CLI to read and update my SubSight subscriptions.
+I am going to organize my subscriptions, bills, and recurring expenses.
+Use the `subsightctl` CLI to record them in SubSight.
 Do not edit `subscriptions.json` directly.
-Before making changes, run `subsightctl list --json`.
-After adding or updating a subscription, run `subsightctl get --id <UUID> --json` or `subsightctl list --json` to verify it.
+Before making changes, run `subsightctl list --json` to check existing records and avoid duplicates.
+When I describe expenses in natural language, infer the amount, currency, cycle, next billing date, category, and notes.
+If the date, currency, or cycle is ambiguous, ask me to confirm.
+After adding or updating a subscription, run `subsightctl get --id <UUID> --json` or `subsightctl list --json` to verify the result.
 ```
 
-Example agent commands:
+You can talk to the agent like this:
+
+```text
+Help me record these recurring expenses:
+Mobile plan is 29 CNY per month and is paid on the 1st of each month.
+AI tool subscription is 100 USD per month; the last payment was on June 23.
+Rent is 1,500 CNY per month, paid every three months; the last payment was on May 20.
+```
+
+The agent should translate natural language into `subsightctl` commands. For example, assuming today is `2026-07-09`, the input above can be recorded as:
 
 ```sh
 subsightctl add \
-  --name "GitHub Copilot" \
-  --amount 10 \
-  --currency USD \
+  --name "Mobile Plan" \
+  --amount 29 \
+  --currency CNY \
   --cycle monthly \
   --next 2026-08-01 \
+  --category Telecom \
+  --payment "Auto Pay" \
+  --notes "Paid on the 1st of each month"
+
+subsightctl add \
+  --name "AI Tool Subscription" \
+  --amount 100 \
+  --currency USD \
+  --cycle monthly \
+  --next 2026-07-23 \
   --category AI \
   --payment "Credit Card" \
-  --account "work account" \
-  --notes "Added by Codex via subsightctl"
+  --notes "Last paid on 2026-06-23; recorded by an agent via subsightctl"
+
+subsightctl add \
+  --name "Rent" \
+  --amount 4500 \
+  --currency CNY \
+  --cycle quarterly \
+  --next 2026-08-20 \
+  --category Housing \
+  --payment "Bank Transfer" \
+  --notes "Calculated as 1,500 CNY per month, paid every three months; last paid on 2026-05-20"
 
 subsightctl due --days 30 --json
 subsightctl summary --base CNY --json
-subsightctl list --query github --json
+subsightctl list --query rent --json
 ```
 
 For demos or isolated agent runs, point the CLI at a separate data file:
 
 ```sh
+rm -f /tmp/subsight-agent-demo.json
+
 SUBSIGHT_DATA_FILE=/tmp/subsight-agent-demo.json subsightctl add \
   --name "Demo Service" \
   --amount 20 \
@@ -158,6 +191,8 @@ SUBSIGHT_DATA_FILE=/tmp/subsight-agent-demo.json subsightctl add \
   --cycle monthly \
   --next 2026-08-01
 ```
+
+For normal use, do not set `SUBSIGHT_DATA_FILE`; the app and CLI will share the default local data file.
 
 ## Data Location
 
