@@ -1,10 +1,29 @@
 # SubSight
 
+[![CI](https://github.com/llwpll/SubSight/actions/workflows/ci.yml/badge.svg)](https://github.com/llwpll/SubSight/actions/workflows/ci.yml)
+
 [简体中文](README.md) | [English](README.en.md)
 
 SubSight is a local-first macOS app for tracking recurring payments. It helps you see upcoming renewals, monthly and yearly cost, categories, payment methods, cancellation links, and notes without sending subscription data to a server.
 
 The project also ships a command-line tool, `subsightctl`, for agents, scripts, and automation workflows.
+
+## Table of Contents
+
+- [Screenshots](#screenshots)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Install the App](#install-the-app)
+- [Install the CLI](#install-the-cli)
+- [First Use](#first-use)
+- [Recording Subscriptions with an Agent](#recording-subscriptions-with-an-agent)
+- [Common CLI Commands](#common-cli-commands)
+- [Data Location](#data-location)
+- [Privacy Notes](#privacy-notes)
+- [Development](#development)
+- [Design](#design)
+- [Changelog](#changelog)
+- [License](#license)
 
 ## Screenshots
 
@@ -33,7 +52,7 @@ Screenshots use sample data.
 
 ## Install the App
 
-Download `SubSight-<version>-macos-app.zip` from GitHub Releases, unzip it, and open the app:
+Download `SubSight-<version>-macos-app.zip` from [GitHub Releases](https://github.com/llwpll/SubSight/releases), unzip it, and open the app:
 
 ```sh
 unzip SubSight-<version>-macos-app.zip
@@ -44,7 +63,7 @@ If macOS asks for confirmation on first launch, right-click `SubSight.app` in Fi
 
 ## Install the CLI
 
-Download `subsightctl-<version>-macos-<arch>.tar.gz` from GitHub Releases, then install it somewhere on your `PATH`:
+Download `subsightctl-<version>-macos-<arch>.tar.gz` from [GitHub Releases](https://github.com/llwpll/SubSight/releases), then install it somewhere on your `PATH`:
 
 ```sh
 tar -xzf subsightctl-<version>-macos-<arch>.tar.gz
@@ -84,65 +103,9 @@ subsightctl list --json
 
 ## First Use
 
-Open `SubSight.app` and use the add button in the top-right corner to record subscriptions. The app and CLI share the same local data file.
+The recommended way to start is to let a local agent record subscriptions through `subsightctl`. After installing the CLI, give Codex, OpenClaw, or another agent the instructions in [Recording Subscriptions with an Agent](#recording-subscriptions-with-an-agent), then describe your recurring expenses in everyday language.
 
-You can also add the first record from the CLI:
-
-```sh
-subsightctl add \
-  --name "Video Membership" \
-  --amount 68 \
-  --currency CNY \
-  --cycle monthly \
-  --next 2026-08-15 \
-  --category Entertainment \
-  --payment "App Store"
-
-subsightctl list --json
-subsightctl due --days 30 --json
-subsightctl summary --base CNY --json
-```
-
-## Common CLI Commands
-
-```sh
-subsightctl list --json
-subsightctl list --query chat --status active
-subsightctl get --id <UUID> --json
-subsightctl due --days 30 --json
-subsightctl templates --json
-```
-
-Add and edit records:
-
-```sh
-subsightctl add \
-  --name "iCloud+" \
-  --amount 6 \
-  --currency CNY \
-  --cycle monthly \
-  --next 2026-08-01 \
-  --category Cloud \
-  --payment "App Store"
-
-subsightctl update --id <UUID> --amount 12 --next 2026-09-01
-subsightctl pause --id <UUID>
-subsightctl resume --id <UUID>
-subsightctl delete --id <UUID>
-```
-
-Analyze and exchange data:
-
-```sh
-subsightctl summary --base CNY --json
-subsightctl breakdown --dimension category --base CNY --json
-subsightctl breakdown --dimension payment --base CNY --json
-subsightctl export-csv --output ~/Desktop/subsight.csv
-subsightctl import-csv --input ~/Desktop/subsight.csv --replace
-subsightctl export-json --output ~/Desktop/subsight.json
-subsightctl import-json --input ~/Desktop/subsight.json --replace
-subsightctl rates --base USD --quotes CNY,EUR,HKD
-```
+If you prefer manual entry, open `SubSight.app` and use the add button in the top-right corner to record subscriptions one by one. The app and CLI share the same local data file.
 
 ## Recording Subscriptions with an Agent
 
@@ -222,6 +185,47 @@ SUBSIGHT_DATA_FILE=/tmp/subsight-agent-demo.json subsightctl add \
 
 For normal use, do not set `SUBSIGHT_DATA_FILE`; the app and CLI will share the default local data file.
 
+## Common CLI Commands
+
+```sh
+subsightctl list --json
+subsightctl list --query chat --status active
+subsightctl get --id <UUID> --json
+subsightctl due --days 30 --json
+subsightctl templates --json
+```
+
+Add and edit records:
+
+```sh
+subsightctl add \
+  --name "iCloud+" \
+  --amount 6 \
+  --currency CNY \
+  --cycle monthly \
+  --next 2026-08-01 \
+  --category Cloud \
+  --payment "App Store"
+
+subsightctl update --id <UUID> --amount 12 --next 2026-09-01
+subsightctl pause --id <UUID>
+subsightctl resume --id <UUID>
+subsightctl delete --id <UUID>
+```
+
+Analyze and exchange data:
+
+```sh
+subsightctl summary --base CNY --json
+subsightctl breakdown --dimension category --base CNY --json
+subsightctl breakdown --dimension payment --base CNY --json
+subsightctl export-csv --output ~/Desktop/subsight.csv
+subsightctl import-csv --input ~/Desktop/subsight.csv --replace
+subsightctl export-json --output ~/Desktop/subsight.json
+subsightctl import-json --input ~/Desktop/subsight.json --replace
+subsightctl rates --base USD --quotes CNY,EUR,HKD
+```
+
 ## Data Location
 
 By default, the app and CLI share this file:
@@ -259,6 +263,10 @@ open .build/SubSight.app
 ## Design
 
 - [SubSight Design System](docs/SubSight-Design-System.md)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## License
 
