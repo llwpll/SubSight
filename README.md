@@ -1,31 +1,31 @@
 # SubSight
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[简体中文](README.md) | [English](README.en.md)
 
-SubSight is a local-first macOS app for tracking recurring payments. It helps you see upcoming renewals, monthly and yearly cost, categories, payment methods, cancellation links, and notes without sending subscription data to a server.
+SubSight 是一款本地优先的 macOS 订阅管理应用，用来跟踪各类周期性付款。它可以帮你查看即将续费的项目、月度和年度成本、分类、付款方式、取消链接和备注，同时不会把你的订阅数据上传到服务器。
 
-The project also ships a command-line tool, `subsightctl`, for agents, scripts, and power users.
+项目也包含一个命令行工具 `subsightctl`，适合脚本、自动化流程和高级用户使用。
 
-## Features
+## 功能
 
-- Native macOS app built with SwiftUI
-- Local JSON storage under Application Support
-- Add, edit, pause, resume, and delete subscriptions
-- Track amount, currency, billing cycle, next billing date, category, payment method, account hint, cancellation URL, notes, payment limits, and end dates
-- Overview for active subscriptions, monthly cost, yearly cost, category breakdown, payment breakdown, and upcoming renewals
-- Menu bar item for quick access to upcoming charges
-- Privacy mode for hiding sensitive names and amounts on screen
-- CSV and JSON import/export
-- `subsightctl` CLI for list, get, add, update, pause, resume, delete, summary, breakdown, rates, templates, import, and export
+- 使用 SwiftUI 构建的原生 macOS 应用
+- 订阅数据以本地 JSON 文件保存到 Application Support
+- 添加、编辑、暂停、恢复和删除订阅
+- 记录金额、币种、计费周期、下次扣费日期、分类、付款方式、账号提示、取消链接、备注、付款期数和结束日期
+- 汇总活跃订阅、月度成本、年度成本、分类占比、付款方式占比和近期续费
+- 菜单栏入口，快速查看即将扣费的项目
+- 隐私模式，可在屏幕上隐藏敏感名称和金额
+- 支持 CSV 和 JSON 导入/导出
+- `subsightctl` CLI 支持 list、get、add、update、pause、resume、delete、summary、breakdown、rates、templates、import 和 export
 
-## Requirements
+## 系统要求
 
-- macOS 15 or later
-- Swift 6.1 or later
+- macOS 15 或更高版本
+- Swift 6.1 或更高版本
 
-## Build the App
+## 构建 App
 
-For local development:
+本地开发：
 
 ```sh
 swift test
@@ -33,32 +33,49 @@ Scripts/build-app.sh
 open .build/SubSight.app
 ```
 
-For a release build:
+构建 release 版本：
 
 ```sh
 CONFIGURATION=release Scripts/build-app.sh
 open .build/SubSight.app
 ```
 
-## Build the CLI
+## 构建 CLI
+
+从源码构建：
 
 ```sh
 swift build -c release --product subsightctl
 ```
 
-Install it somewhere on your `PATH`:
+安装到 `PATH` 中的某个目录：
 
 ```sh
 cp .build/release/subsightctl /usr/local/bin/subsightctl
 ```
 
-Or run it through SwiftPM during development:
+也可以从 GitHub Release 产物安装：
+
+```sh
+tar -xzf subsightctl-<version>-macos-<arch>.tar.gz
+chmod +x subsightctl
+sudo mv subsightctl /usr/local/bin/subsightctl
+```
+
+确认安装成功：
+
+```sh
+subsightctl help
+subsightctl list --json
+```
+
+开发时也可以通过 SwiftPM 直接运行：
 
 ```sh
 swift run subsightctl list --status all
 ```
 
-## CLI Examples
+## CLI 示例
 
 ```sh
 subsightctl list --json
@@ -68,7 +85,7 @@ subsightctl due --days 30 --json
 subsightctl templates --json
 ```
 
-Add and edit records:
+添加和编辑订阅：
 
 ```sh
 subsightctl add \
@@ -86,7 +103,7 @@ subsightctl resume --id <UUID>
 subsightctl delete --id <UUID>
 ```
 
-Analyze and exchange data:
+分析和导入导出数据：
 
 ```sh
 subsightctl summary --base CNY --json
@@ -99,60 +116,105 @@ subsightctl import-json --input ~/Desktop/subsight.json --replace
 subsightctl rates --base USD --quotes CNY,EUR,HKD
 ```
 
-## Data Location
+## 代理使用方式
 
-By default, the app and CLI share this file:
+Codex、OpenClaw、shell 脚本或其他本地代理都可以通过 `subsightctl` 记录订阅。只要 CLI 已经在 `PATH` 里，就不需要额外集成。
+
+可以给代理这样的指令：
+
+```text
+使用 `subsightctl` CLI 读取和更新我的 SubSight 订阅。
+不要直接编辑 `subscriptions.json`。
+修改前先运行 `subsightctl list --json`。
+添加或更新订阅后，用 `subsightctl get --id <UUID> --json` 或 `subsightctl list --json` 验证结果。
+```
+
+代理可以执行的命令示例：
+
+```sh
+subsightctl add \
+  --name "GitHub Copilot" \
+  --amount 10 \
+  --currency USD \
+  --cycle monthly \
+  --next 2026-08-01 \
+  --category AI \
+  --payment "Credit Card" \
+  --account "work account" \
+  --notes "Added by Codex via subsightctl"
+
+subsightctl due --days 30 --json
+subsightctl summary --base CNY --json
+subsightctl list --query github --json
+```
+
+如果只是演示或给代理做隔离测试，可以把 CLI 指向单独的数据文件：
+
+```sh
+SUBSIGHT_DATA_FILE=/tmp/subsight-agent-demo.json subsightctl add \
+  --name "Demo Service" \
+  --amount 20 \
+  --currency USD \
+  --cycle monthly \
+  --next 2026-08-01
+```
+
+## 数据位置
+
+默认情况下，App 和 CLI 共用这个文件：
 
 ```text
 ~/Library/Application Support/SubSight/subscriptions.json
 ```
 
-For tests, demos, or agent sandboxes, point the CLI/app at a different file:
+测试、演示或自动化沙盒场景下，可以把 CLI/App 指向另一个文件：
 
 ```sh
 SUBSIGHT_DATA_FILE=/tmp/subsight-demo.json subsightctl list --json
 ```
 
-Do not commit personal `subscriptions.json` files to the repository.
+不要把个人的 `subscriptions.json` 文件提交到仓库。
 
-## Privacy Notes
+## 隐私说明
 
-SubSight stores subscription records locally and does not upload subscription names, amounts, account hints, notes, or cancellation links. Exchange-rate lookups use `https://api.frankfurter.dev/v2/rates` and send only currency codes such as `USD` and `CNY`.
+SubSight 会把订阅记录保存在本地，不会上传订阅名称、金额、账号提示、备注或取消链接。汇率查询会访问 `https://api.frankfurter.dev/v2/rates`，但只发送 `USD`、`CNY` 这样的币种代码。
 
-## Release Artifacts
+如果你要把项目发布到 GitHub，请不要提交个人导出的 JSON/CSV、真实账号、付款信息、截图中的敏感内容或任何 `.env`/私钥文件。
 
-Create GitHub Release-ready artifacts:
+## Release 产物
+
+创建可上传到 GitHub Release 的产物：
 
 ```sh
 Scripts/package-release.sh
 ```
 
-The script writes artifacts to:
+脚本会把产物写入：
 
 ```text
 .build/release-artifacts/SubSight-<version>/
 ```
 
-It produces:
+会生成：
 
 - `SubSight-<version>-macos-app.zip`
 - `subsightctl-<version>-macos-<arch>.tar.gz`
 - `SHA256SUMS.txt`
 
-Upload those files to a GitHub Release.
+把这些文件上传到 GitHub Release 即可。
 
-After pushing to GitHub, tags that start with `v` will trigger the release workflow:
+推送到 GitHub 后，以 `v` 开头的 tag 会触发 release workflow：
 
 ```sh
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The workflow will run tests, package the app and CLI, and create a GitHub Release.
+workflow 会运行测试、打包 App 和 CLI，并创建 GitHub Release。
 
-## GitHub Setup
+## GitHub 设置
 
-Initialize and push a new repository:
+初始化并推送新仓库：
 
 ```sh
 git init
@@ -163,17 +225,17 @@ git remote add origin git@github.com:<your-name>/SubSight.git
 git push -u origin main
 ```
 
-Before committing, configure public Git author information so a private email address does not appear in commit metadata:
+提交前建议配置公开用的 Git 作者信息，避免私人邮箱出现在 commit 记录里：
 
 ```sh
 git config user.name "<your GitHub username or display name>"
 git config user.email "<your GitHub noreply email>"
 ```
 
-## Design
+## 设计
 
 - [SubSight Design System](docs/SubSight-Design-System.md)
 
-## License
+## 许可证
 
-MIT. See [LICENSE](LICENSE).
+MIT。详见 [LICENSE](LICENSE)。
