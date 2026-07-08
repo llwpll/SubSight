@@ -6,6 +6,14 @@ SubSight is a local-first macOS app for tracking recurring payments. It helps yo
 
 The project also ships a command-line tool, `subsightctl`, for agents, scripts, and power users.
 
+## Screenshots
+
+Screenshots use sample data.
+
+![SubSight mock overview](docs/screenshots/subsight-mock-overview.png)
+
+![SubSight privacy mode mock](docs/screenshots/subsight-mock-privacy.png)
+
 ## Features
 
 - Native macOS app built with SwiftUI
@@ -126,7 +134,7 @@ subsightctl import-json --input ~/Desktop/subsight.json --replace
 subsightctl rates --base USD --quotes CNY,EUR,HKD
 ```
 
-## Agent Usage
+## Recording Subscriptions with an Agent
 
 Codex, OpenClaw, shell scripts, and other local agents can record subscriptions by calling `subsightctl`. No special integration is required as long as the CLI is on `PATH`, and the agent does not need to edit the data file directly.
 
@@ -218,62 +226,9 @@ For tests, demos, or agent sandboxes, point the CLI/app at a different file:
 SUBSIGHT_DATA_FILE=/tmp/subsight-demo.json subsightctl list --json
 ```
 
-Do not commit personal `subscriptions.json` files to the repository.
-
 ## Privacy Notes
 
 SubSight stores subscription records locally and does not upload subscription names, amounts, account hints, notes, or cancellation links. Exchange-rate lookups use `https://api.frankfurter.dev/v2/rates` and send only currency codes such as `USD` and `CNY`.
-
-## Release Artifacts
-
-Create GitHub Release-ready artifacts:
-
-```sh
-Scripts/package-release.sh
-```
-
-The script writes artifacts to:
-
-```text
-.build/release-artifacts/SubSight-<version>/
-```
-
-It produces:
-
-- `SubSight-<version>-macos-app.zip`
-- `subsightctl-<version>-macos-<arch>.tar.gz`
-- `SHA256SUMS.txt`
-
-Upload those files to a GitHub Release.
-
-After pushing to GitHub, tags that start with `v` will trigger the release workflow:
-
-```sh
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-The workflow will run tests, package the app and CLI, and create a GitHub Release.
-
-## GitHub Setup
-
-Initialize and push a new repository:
-
-```sh
-git init
-git add .
-git commit -m "Initial release"
-git branch -M main
-git remote add origin git@github.com:<your-name>/SubSight.git
-git push -u origin main
-```
-
-Before committing, configure public Git author information so a private email address does not appear in commit metadata:
-
-```sh
-git config user.name "<your GitHub username or display name>"
-git config user.email "<your GitHub noreply email>"
-```
 
 ## Design
 
