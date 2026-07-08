@@ -4,7 +4,7 @@
 
 SubSight is a local-first macOS app for tracking recurring payments. It helps you see upcoming renewals, monthly and yearly cost, categories, payment methods, cancellation links, and notes without sending subscription data to a server.
 
-The project also ships a command-line tool, `subsightctl`, for agents, scripts, and power users.
+The project also ships a command-line tool, `subsightctl`, for agents, scripts, and automation workflows.
 
 ## Screenshots
 
@@ -29,71 +29,81 @@ Screenshots use sample data.
 ## Requirements
 
 - macOS 15 or later
-- Swift 6.1 or later
+- Swift 6.1 or later if you want to build from source
 
-## Build the App
+## Install the App
 
-For local development:
-
-```sh
-swift test
-Scripts/build-app.sh
-open .build/SubSight.app
-```
-
-For a release build:
+Download `SubSight-<version>-macos-app.zip` from GitHub Releases, unzip it, and open the app:
 
 ```sh
-CONFIGURATION=release Scripts/build-app.sh
-open .build/SubSight.app
+unzip SubSight-<version>-macos-app.zip
+open SubSight.app
 ```
 
-## Build the CLI
+If macOS asks for confirmation on first launch, right-click `SubSight.app` in Finder and choose Open.
 
-From source:
+## Install the CLI
 
-```sh
-swift build -c release --product subsightctl
-```
-
-Install it somewhere on your `PATH`. For Apple Silicon + Homebrew, this usually works:
-
-```sh
-install -m 755 .build/release/subsightctl /opt/homebrew/bin/subsightctl
-```
-
-Or install it into your user-local bin directory to avoid system directory permissions:
-
-```sh
-mkdir -p ~/.local/bin
-install -m 755 .build/release/subsightctl ~/.local/bin/subsightctl
-```
-
-Or install from a GitHub Release artifact:
+Download `subsightctl-<version>-macos-<arch>.tar.gz` from GitHub Releases, then install it somewhere on your `PATH`:
 
 ```sh
 tar -xzf subsightctl-<version>-macos-<arch>.tar.gz
 chmod +x subsightctl
-install -m 755 subsightctl /opt/homebrew/bin/subsightctl
-# Or:
 mkdir -p ~/.local/bin
 install -m 755 subsightctl ~/.local/bin/subsightctl
+```
+
+If `~/.local/bin` is not on your `PATH`, add it to your zsh config:
+
+```sh
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Apple Silicon + Homebrew users can also install it to `/opt/homebrew/bin`:
+
+```sh
+install -m 755 subsightctl /opt/homebrew/bin/subsightctl
+```
+
+Install the CLI from source:
+
+```sh
+swift build -c release --product subsightctl
+mkdir -p ~/.local/bin
+install -m 755 .build/release/subsightctl ~/.local/bin/subsightctl
 ```
 
 Verify the install:
 
 ```sh
+command -v subsightctl
 subsightctl help
 subsightctl list --json
 ```
 
-Or run it through SwiftPM during development:
+## First Use
+
+Open `SubSight.app` and use the add button in the top-right corner to record subscriptions. The app and CLI share the same local data file.
+
+You can also add the first record from the CLI:
 
 ```sh
-swift run subsightctl list --status all
+subsightctl add \
+  --name "Video Membership" \
+  --amount 68 \
+  --currency CNY \
+  --cycle monthly \
+  --next 2026-08-15 \
+  --category Entertainment \
+  --payment "App Store"
+
+subsightctl list --json
+subsightctl due --days 30 --json
+subsightctl summary --base CNY --json
 ```
 
-## CLI Examples
+## Common CLI Commands
 
 ```sh
 subsightctl list --json
@@ -229,6 +239,22 @@ SUBSIGHT_DATA_FILE=/tmp/subsight-demo.json subsightctl list --json
 ## Privacy Notes
 
 SubSight stores subscription records locally and does not upload subscription names, amounts, account hints, notes, or cancellation links. Exchange-rate lookups use `https://api.frankfurter.dev/v2/rates` and send only currency codes such as `USD` and `CNY`.
+
+## Development
+
+```sh
+swift test
+Scripts/build-app.sh
+open .build/SubSight.app
+swift run subsightctl list --status all
+```
+
+Build a release version of the app:
+
+```sh
+CONFIGURATION=release Scripts/build-app.sh
+open .build/SubSight.app
+```
 
 ## Design
 
