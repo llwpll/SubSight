@@ -1,6 +1,6 @@
 # SubSight
 
-<p align="center">
+<p align="left">
     <a href="https://github.com/llwpll/SubSight/actions/workflows/ci.yml"><img src="https://github.com/llwpll/SubSight/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
     <a href="https://linux.do" alt="LINUX DO"><img src="https://shorturl.at/ggSqS" /></a>
 </p>
